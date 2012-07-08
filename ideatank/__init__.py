@@ -15,6 +15,11 @@ def main(global_config, **settings):
     config.add_route('ideas', 'ideas/all')
     config.add_route('new_idea', '/ideas/new')
     config.add_route('view_idea', '/ideas/{id}')
+    config.add_route('ideas_by_cat','/ideas/category/{cat_id}')    
+    config.add_route('delete_idea', '/ideas/delete/{id}')
+    config.add_route('new_user', 'users/new')
+    config.add_route('login_user', 'users/login')
+    config.add_route('categories','/categories')    
     
     
     config.scan()

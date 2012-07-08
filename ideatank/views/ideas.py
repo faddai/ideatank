@@ -1,7 +1,9 @@
+from datetime import datetime
+
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound
 from ..models import (
-    DBSession, Idea
+    DBSession, Idea, Category
     )
 
 @view_config(route_name='ideas-root')
@@ -21,6 +23,15 @@ def all_ideas(req):
         return Response('<h2>No idea has been added.</h2>', content_type="text/html", status_int=500)
         
     return {'ideas': ideas}
+    
+@view_config(route_name='ideas_by_cat', renderer='ideas/ideas_by_cat.mako')
+def ideas_by_category(req):
+    cat_id = req.matchdict['cat_id']
+    db = DBSession()
+    ideas = db.query(Idea).filter_by(category_id = cat_id).all()
+    return dict(
+        ideas = ideas
+    )
 
 @view_config(route_name='view_idea', renderer='ideas/view_idea.mako')
 def view_idea(req):
@@ -40,14 +51,20 @@ def view_idea(req):
 
 @view_config(route_name="new_idea", renderer="ideas/new.mako")
 def new(request):
-
-    if "form_submitted" in request.POST and form.validate():
-        dbsession = DBSession()
-        category = form.bind(Category())
-        # TODO: db error control?
-        dbsession.add(category)
-        request.session.flash("warning;New Category is saved!")
-        return HTTPFound(location = request.route_url("category_list"))
+    
+    if "form_submitted" in request.POST:
+        db = DBSession()
+        cat = Category()
+        
+        idea = Idea()
+        idea.author = "Jacob Hikins"
+        idea.title = req.params.get('title')
+        idea.description = req.params.get('description')
+        idea.created_at = datetime.now()
+        idea.category_id = req.params.get('category')
+        db.add(idea)
+        #request.session.flash("warning;New Category is saved!")
+        return HTTPFound(location = request.route_url("ideas"))
         
     return dict(save_url=request.route_url("new_idea"))
 
@@ -73,26 +90,30 @@ def edit(request):
     action_url = request.route_url("category_edit", id=id)
     return dict(form=FormRenderer(form), 
                 action_url=action_url)
-    
-@view_config(route_name="category_delete")
+"""
+
+"""
+Requires authorisation
+"""
+@view_config(route_name="delete_idea")
 def delete(request):
-    """"category delete """"
+    """delete idea"""
     id = request.matchdict['id']
     dbsession = DBSession()
-    category = dbsession.query(Category).filter_by(id=id).first()
-    if category is None:
-        request.session.flash("error;Category not found!")
-        return HTTPFound(location=request.route_url("category_list"))        
+    idea = dbsession.query(Idea).filter_by(id=id).first()
+    if idea is None:
+        request.session.flash("error;Idea not found!")
+        return HTTPFound(location=request.route_url("ideas"))        
     
     try:
         transaction.begin()
-        dbsession.delete(category);
+        dbsession.delete(idea);
         transaction.commit()
-        request.session.flash("warning;The category is deleted!")
+        #request.session.flash("warning;The category is deleted!")
     except IntegrityError:
+        pass
         # delete error
-        transaction.abort()
-        request.session.flash("error;The category could not be deleted!")
+        #transaction.abort()
+        #request.session.flash("error;The category could not be deleted!")
     
     return HTTPFound(location=request.route_url("category_list"))
-"""

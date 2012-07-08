@@ -5,7 +5,6 @@ from sqlalchemy import (
     String,
     ForeignKey,
     DateTime,
-    
     )
 
 from sqlalchemy.ext.declarative import declarative_base
