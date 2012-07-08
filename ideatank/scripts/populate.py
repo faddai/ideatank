@@ -11,8 +11,10 @@ from pyramid.paster import (
 
 from ..models import (
     DBSession,
-    MyModel,
     Base,
+    User,
+    Idea,
+    Category
     )
 
 def usage(argv):
@@ -31,5 +33,13 @@ def main(argv=sys.argv):
     DBSession.configure(bind=engine)
     Base.metadata.create_all(engine)
     with transaction.manager:
-        model = MyModel(name='one', value=1)
-        DBSession.add(model)
+        """
+        Seed Data
+        Pre-populate database with this data
+        """
+        categories = [
+            Category('technology'),
+            Category('agriculture'),
+            Category('Fisheries')
+        ]
+        DBSession.add_all(categories)
