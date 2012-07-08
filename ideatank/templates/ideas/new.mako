@@ -16,8 +16,8 @@
     </select>
 
     <label for="description">Description</label>
-    <textarea name="description" id="description"></textarea>
+    <textarea name="description" id="description" cols="12" rows="6"></textarea>
 
-    <input type="submit" name="form.submitted" value="Add idea" />
+    <p><input type="submit" name="form.submitted" value="Add idea" class="btn btn-primary" /></p>
 
 </form>
